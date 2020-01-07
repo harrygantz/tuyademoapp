@@ -6,7 +6,7 @@ using System.Net.Http;
 using System.Web.Http;
 using TuYaDataAccess;
 using TuYaDemo.Helpers;
-
+using TuYaDemo.Models.ViewModels;
 
 namespace TuYaDemo.Controllers
 {
@@ -15,20 +15,40 @@ namespace TuYaDemo.Controllers
     /// </summary>
     public class OrderController : ApiController
     {
+
         /// <summary>
         /// Returns all of the orders
         /// </summary>
         /// <returns></returns>
         [HttpGet]
         [Route("api/Orders/GetAllOrders")]
-        // GET: api/Order
-        public IEnumerable<Order> GetAllOrders()
+        // GET: api/Orders/GetAllOrders
+        public IHttpActionResult GetOrder()
         {
-            using (TUYAEntities context = new TUYAEntities())
+            IList<OrderViewModel> orders = null;
+
+            using (var context = new TUYAEntities())
             {
-                return context.Orders.ToList();
+                //orders = context.Orders.ToList<OrderViewModel>();
+                orders = context.Orders.Select(x => new OrderViewModel()
+                {
+                    OrderID = x.OrderID,
+                    ShipperID = x.ShipperID,
+                    DriverID = x.DriverID,
+                    CompletionDte = x.CompletionDte,
+                    Status = x.Status,
+                    Code = x.Code,
+                    MSA = x.MSA,
+                    Duration = x.Duration,
+                    OfferType = x.OfferType
+                }).ToList<OrderViewModel>();
+            }
+            if (orders.Count == 0)
+            {
+                return NotFound();
             }
 
+            return Ok(orders);
         }
 
         /// <summary>
@@ -55,16 +75,37 @@ namespace TuYaDemo.Controllers
         /// <returns></returns>
         [HttpGet]
         [Route("api/Orders/GetOrder/{orderId:int}/{completionDte}")]
-        public Order GetOrder(int orderId, string completionDte)
+        public IHttpActionResult GetOrder(int orderId, string completionDte)
         {
             var dt = FormattingHelper.GetDateTime(completionDte);
             var dtTomorrow = dt.AddDays(1);
-            using (TUYAEntities context = new TUYAEntities())
+
+            IList<OrderViewModel> orders = null;
+
+            using (var context = new TUYAEntities())
             {
-                return context.Orders.FirstOrDefault(x => x.OrderID == orderId && (x.CompletionDte >= dt && x.CompletionDte < dtTomorrow));
+                //orders = context.Orders.ToList<OrderViewModel>();
+                orders = context.Orders.Select(x => new OrderViewModel()
+                {
+                    OrderID = x.OrderID,
+                    ShipperID = x.ShipperID,
+                    DriverID = x.DriverID,
+                    CompletionDte = x.CompletionDte,
+                    Status = x.Status,
+                    Code = x.Code,
+                    MSA = x.MSA,
+                    Duration = x.Duration,
+                    OfferType = x.OfferType
+                }).Where(x => x.OrderID == orderId && (x.CompletionDte >= dt && x.CompletionDte < dtTomorrow)).ToList<OrderViewModel>();
+            }
+            if (orders.Count == 0)
+            {
+                return NotFound();
             }
 
+            return Ok(orders);
         }
+
 
         /// <summary>
         /// Returns all orders within 24 hours of the date that have the specified msa and status
@@ -75,14 +116,36 @@ namespace TuYaDemo.Controllers
         /// <returns></returns>
         [HttpGet]
         [Route("api/Orders/GetOrder/{msa:int}/{status:int}/{completionDte}")]
-        public Order GetOrder(int msa, int status, string completionDte)
+        public IHttpActionResult GetOrder(int msa, int status, string completionDte)
         {
-            var dt = FormattingHelper.GetDateTime(completionDte);
-            var dtTomorrow = dt.AddDays(1);
-            using (TUYAEntities context = new TUYAEntities())
-            {
-                return context.Orders.FirstOrDefault(x => x.MSA == msa && x.Status == status && (x.CompletionDte >= dt && x.CompletionDte < dtTomorrow));
-            }
+  
+                var dt = FormattingHelper.GetDateTime(completionDte);
+                var dtTomorrow = dt.AddDays(1);
+
+                IList<OrderViewModel> orders = null;
+
+                using (var context = new TUYAEntities())
+                {
+                    //orders = context.Orders.ToList<OrderViewModel>();
+                    orders = context.Orders.Select(x => new OrderViewModel()
+                    {
+                        OrderID = x.OrderID,
+                        ShipperID = x.ShipperID,
+                        DriverID = x.DriverID,
+                        CompletionDte = x.CompletionDte,
+                        Status = x.Status,
+                        Code = x.Code,
+                        MSA = x.MSA,
+                        Duration = x.Duration,
+                        OfferType = x.OfferType
+                    }).Where(x => x.MSA == msa && x.Status == status && (x.CompletionDte >= dt && x.CompletionDte < dtTomorrow)).ToList<OrderViewModel>();
+                }
+                if (orders.Count == 0)
+                {
+                    return NotFound();
+                }
+
+                return Ok(orders);                     
 
         }
 

@@ -486,7 +486,7 @@
             Information regarding current and past orders with tuya
             </summary>
         </member>
-        <member name="M:TuYaDemo.Controllers.OrderController.GetAllOrders">
+        <member name="M:TuYaDemo.Controllers.OrderController.GetOrder">
             <summary>
             Returns all of the orders
             </summary>
